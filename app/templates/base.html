@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Панель управления</title>
+        <script src="{{ url_for('static', filename='js/bootstrap.bundle.js') }}"></script>
+        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon/fav_logo.ico') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon/fav_logo.ico') }}">
+    </head>
+    <body class="bg-dark">
+        <div class="row">
+            <div id="notifications"></div>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+            <script>
+            function pushget(){
+                $.ajax({
+                    url: "/user_notifications",
+                    method: "get",
+                    dataType: "html",
+                    async: true,
+                    success: function(response) {
+                      if (response != "") {
+                        $("#notifications").html(response);
+                      }
+                      setTimeout(pushget, 1000);
+                    },
+                    error: function(xhr) {
+                      setTimeout(pushget, 1000);
+                    },
+                });
+            };
+            pushget();
+            </script>
+        </div>
+        <div class="container-fluid bg-dark">
+          <main class="col-md-9 ms-sm-auto col-lg-10 px-md-1" id="base_main">
+            {% block main %}
+            {% endblock main %}
+          </main>
+        </div>
+    </body>
+</html>
