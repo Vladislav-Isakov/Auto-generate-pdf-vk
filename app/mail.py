@@ -34,6 +34,15 @@ class ThreadWithReturnValue(Thread):
         return self._return
 
 def send_email(subject: str = app.config['MAIL_DEFAULT_THEME'], sender: str = app.config['MAIL_DEFAULT_SENDER'], recipients: list[str] = [], text: bool = True, text_body: str = '', html: bool = False, html_body: str = '', attachment: bool = False, attachments: list[dict] = []):
+    """Функция, отвечающая за отправку email письма пользователям \n
+    subject - тема письма\n
+    sender - отправитель письма\n
+    recipients - получатели письма\n
+    text - если True - необходимо передать тело письма\n
+    html - если True - необходимо передать html разметку, которая отобразится в письме\n
+    attachment - если True - необходимо передать список со словарями, описывающие файлы, необходимые для прикрепления\n
+    Пример attachment [{'path': f'47493b0de9b9f53aa2674a7889af0a7176cd360768638716a71619bcdd19777c.pdf', 'name': 'Blagodarstvenoe_pismo'}]
+    """
     msg = Message(subject, sender=sender, recipients=recipients)
     if text:
         msg.body = text_body

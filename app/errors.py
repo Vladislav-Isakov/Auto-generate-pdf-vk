@@ -1,9 +1,7 @@
-from flask_login import current_user
 from app import app, db
 
-@app.errorhandler(Exception)
+@app.errorhandler(400)
 def not_found_error_400(error):
-    #app.logger.error(f'Возникла ошибка в контексте аккаунта пользователя с ID: {current_user.vk_id}', exc_info=True)
     pass
 
 @app.errorhandler(404)

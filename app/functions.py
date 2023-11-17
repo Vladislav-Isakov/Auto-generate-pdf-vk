@@ -5,12 +5,10 @@ import requests
 from datetime import datetime
 from pprint import pprint as print
 from requests.exceptions import Timeout
-from app import app, db
-from app.classes import AdminPFD, SertificatePDF
+from app import app
+from app.classes import AdminPFD
 from app.mail import send_email
-from sqlalchemy.orm import joinedload
-from flask import flash, jsonify, request, abort
-from flask_login import current_user
+from flask import flash
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -130,7 +128,7 @@ def AutoSendingEmailsAdmin(SPREADSHEET_ID: str = app.config['TABLE_LETTERS_TO_MA
     try:
         response = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range, valueRenderOption=value_render_option, dateTimeRenderOption=date_time_render_option, majorDimension=major_dimension).execute()
     except TypeError as msg:
-        app.logger.error(f'Ошибка получения данных из таблицы писем гос. пабликам: \n {msg}', exc_info=True)
+        app.logger.error(f'Ошибка получения данных из таблицы писем: \n {msg}', exc_info=True)
         return
     number_user = 1
     for value in response['values'][1:]:
@@ -205,7 +203,7 @@ def AutoSendingEmailsAdmin(SPREADSHEET_ID: str = app.config['TABLE_LETTERS_TO_MA
             try:
                 name_employee = value[9]
             except IndexError as msg:
-                app.logger.error(f'Ошибка получения данных о сотруднике: \n {msg}', exc_info=True)
+                app.logger.error(f'Ошибка получения данных о пользователе: \n {msg}', exc_info=True)
                 values_batch_update_in_google_spreadsheet(SPREADSHEET_ID, [
                     {
                         "majorDimension": "ROWS",
@@ -220,7 +218,7 @@ def AutoSendingEmailsAdmin(SPREADSHEET_ID: str = app.config['TABLE_LETTERS_TO_MA
                         "majorDimension": "ROWS",
                         "values": [
                             [
-                                f"Ошибка получения данных о сотруднике: \n {msg}"
+                                f"Ошибка получения данных о пользователе: \n {msg}"
                             ]
                         ],
                         "range": f"S{number_user}"
@@ -230,7 +228,7 @@ def AutoSendingEmailsAdmin(SPREADSHEET_ID: str = app.config['TABLE_LETTERS_TO_MA
             try:
                 employee_gender = value[13]
             except IndexError as msg:
-                app.logger.error(f'Ошибка получения данных пола сотруднике: \n {msg}', exc_info=True)
+                app.logger.error(f'Ошибка получения данных пола: \n {msg}', exc_info=True)
                 values_batch_update_in_google_spreadsheet(SPREADSHEET_ID, [
                     {
                         "majorDimension": "ROWS",
@@ -245,32 +243,7 @@ def AutoSendingEmailsAdmin(SPREADSHEET_ID: str = app.config['TABLE_LETTERS_TO_MA
                         "majorDimension": "ROWS",
                         "values": [
                             [
-                                f"Ошибка получения данных пола сотруднике: \n {msg}"
-                            ]
-                        ],
-                        "range": f"S{number_user}"
-                    }
-                ])
-                continue
-            try:
-                organization = value[7]
-            except IndexError as msg:
-                app.logger.error(f'Ошибка получения данных организации сотруднике: \n {msg}', exc_info=True)
-                values_batch_update_in_google_spreadsheet(SPREADSHEET_ID, [
-                    {
-                        "majorDimension": "ROWS",
-                        "values": [
-                            [
-                                f"{current_date}"
-                            ]
-                        ],
-                        "range": f"R{number_user}"
-                    },
-                    {
-                        "majorDimension": "ROWS",
-                        "values": [
-                            [
-                                f"Ошибка получения данных организации сотруднике: \n {msg}"
+                                f"Ошибка получения данных пола пользователя: \n {msg}"
                             ]
                         ],
                         "range": f"S{number_user}"
@@ -283,17 +256,16 @@ def AutoSendingEmailsAdmin(SPREADSHEET_ID: str = app.config['TABLE_LETTERS_TO_MA
                     "greeting": ' '.join(
                         list(
                             map(replacing_quotes, 
-                                text_greeting
-                                .replace(' !', '!')
-                                .replace('\n', '<br />').split()
+                                text_greeting.replace('\n', '<br />').split()
                                 ))),
                     "body": text_body.replace('\n', '<br />'),
                     "date": datetime.now().strftime('%d.%m.%Y')
                 })
-                pdf_file.generate_admin_pdf()
+                pdf_file.generate_admin_pdf() # генерация PDF файла
                 mail_text_body = '' #body письма, которое будет отправляться пользователям
-                #subject - тема email письма, отправляемое пользователям
-                send_status = send_email(subject='', recipients=[str(email_one), str(email_two)] if email_one and email_two else [str(email_one)], text=True, text_body=mail_text_body, attachment=True, attachments=[{'path': f'{pdf_file.output_path}{pdf_file.id_doc}.pdf', 'name': 'Blagodarstvennoe_pismo_ot_VK_za_' + str(unidecode.unidecode(name_employee)).replace("'", "").replace(" ", "_")}])
+                # subject - тема email письма, отправляемое пользователям
+                # name - название pdf файла, которое будет установлено файлу, при отправке письма пользователю
+                send_status = send_email(subject='', recipients=[str(email_one), str(email_two)] if email_one and email_two else [str(email_one)], text=True, text_body=mail_text_body, attachment=True, attachments=[{'path': f'{pdf_file.output_path}{pdf_file.id_doc}.pdf', 'name': '' + str(unidecode.unidecode(name_employee)).replace("'", "").replace(" ", "_")}])
                 if send_status['status'] == 'error':
                     values_body = [
                         {

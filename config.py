@@ -13,9 +13,6 @@ class Config(object):
     MAX_CONTENT_LENGTH = 25 * 1024 * 1024
     SCOPES_GOOGLE = ["https://www.googleapis.com/auth/spreadsheets"]
     URL_PATH_TO_MAIL_PDF = "http://127.0.0.1:5000/pdf/mail/"
-    URL_PATH_TO_MAIL_DOCX = "http://127.0.0.1:5000/docx/mail/"
-    URL_PATH_TO_CERT_PDF = ""
-    URL_PATH_TO_CERT_DOCX = ""
     TABLE_LETTERS_TO_MANAGERS_SPREADSHEET_ID = "" #id гугл-таблицы (получается из ссылки на таблицу)
     MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.mail.ru'
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)

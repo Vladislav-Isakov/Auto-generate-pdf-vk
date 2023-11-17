@@ -4,6 +4,7 @@ from app import app
 import secrets
 
 class PDF:
+    """Родительский класс, описывающий необходимые атрибуты для генерации PDF файлов"""
     #путь до wkhtmltopdf на ПК/Машине
     path_to_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
     config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
@@ -16,7 +17,8 @@ class PDF:
         "margin-left": "0px",
         "encoding": "UTF-8"
     }
-    
+    # template - путь, до HTML разметки, по которой будет генерироваться PDF файл
+    # output_path - путь, куда сохранится сгенерированный файл - не менять
     def generate_pdf(self, template: str = "pdf/mail.html", data: dict = {}, output_path: str = "app/static/generate_pdf/"):
         print(output_path)
         return pdfkit.from_string(render_template(template, data=data), output_path=output_path, options=self.options, cover_first=True, configuration=self.config)
@@ -26,6 +28,9 @@ class AdminPFD(PDF):
 
     template = "pdf/mail.html"
     output_path = "app/static/generate_pdf/mail/"
+    
+    # template - путь, до HTML разметки, по которой будет генерироваться PDF файл
+    # output_path - путь, куда сохранится сгенерированный файл - не менять
 
     def __init__(self, data) -> None:
         self.data = data
